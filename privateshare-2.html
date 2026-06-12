@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>PrivateShare</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0d10;--s1:#16161a;--s2:#1e1e24;--s3:#25252d;
+  --b:rgba(255,255,255,0.07);--bh:rgba(255,255,255,0.14);
+  --accent:#7c6af7;--adim:rgba(124,106,247,0.15);--aglow:rgba(124,106,247,0.28);
+  --green:#22c55e;--gdim:rgba(34,197,94,0.12);
+  --yellow:#f59e0b;--red:#ef4444;
+  --t:#f0f0f4;--t2:#9090a0;--t3:#55556a;
+  --mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;
+  --r:10px;--rl:14px;
+}
+html{background:var(--bg);color:var(--t);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;min-height:100dvh}
+.shell{max-width:900px;margin:0 auto;padding:2rem 1.25rem 4rem}
+
+/* ── Header ── */
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:.75rem}
+.brand{display:flex;align-items:center;gap:11px}
+.bi{width:38px;height:38px;border-radius:9px;background:var(--adim);border:1px solid var(--aglow);display:flex;align-items:center;justify-content:center}
+.bi svg{width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bn{font-size:16px;font-weight:600;letter-spacing:-0.02em}
+.bn span{color:var(--accent)}
+.ppill{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--green);background:var(--gdim);border:1px solid rgba(34,197,94,0.2);border-radius:99px;padding:3px 10px}
+.ppill svg{width:12px;height:12px;stroke:var(--green);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Shared button/util styles ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:40px;padding:0 16px;border-radius:var(--r);border:1px solid var(--b);background:transparent;color:var(--t);font-size:13px;font-family:var(--sans);cursor:pointer;transition:all .15s;white-space:nowrap;text-decoration:none}
+.btn:hover:not(:disabled){background:var(--s2);border-color:var(--bh)}
+.btn:active:not(:disabled){transform:scale(.97)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.bta{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500}
+.bta:hover:not(:disabled){background:#6b59e8 !important;border-color:#6b59e8 !important}
+.btf{width:100%}
+.btd{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:var(--red)}
+.btd:hover:not(:disabled){background:rgba(239,68,68,.2) !important}
+.btsm{height:30px;padding:0 11px;font-size:12px}
+.card{background:var(--s1);border:1px solid var(--b);border-radius:var(--rl);padding:1.25rem}
+.lbl{font-size:12px;color:var(--t3);margin-bottom:5px}
+.row{display:flex;gap:8px;align-items:center}
+.sp{flex:1}
+.mt8{margin-top:8px}.mt12{margin-top:12px}
+.dvd{height:1px;background:var(--b);margin:.85rem 0}
+
+/* ── PAGES ── */
+#page-home,#page-session{display:none}
+#page-home.on,#page-session.on{display:block}
+
+/* ── HOME ── */
+.home-hero{text-align:center;padding:1rem 0 2rem}
+.home-hero h1{font-size:28px;font-weight:600;letter-spacing:-0.03em;margin-bottom:.5rem}
+.home-hero h1 span{color:var(--accent)}
+.home-hero p{font-size:14px;color:var(--t2);max-width:380px;margin:0 auto 1.75rem}
+.home-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.home-actions .btn{height:44px;font-size:14px;padding:0 20px}
+
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:2rem}
+@media(max-width:580px){.how-grid{grid-template-columns:1fr}}
+.how-card{background:var(--s1);border:1px solid var(--b);border-radius:var(--rl);padding:1.1rem}
+.how-num{width:26px;height:26px;border-radius:50%;background:var(--adim);border:1px solid var(--aglow);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--accent);margin-bottom:.6rem}
+.how-card h3{font-size:13px;font-weight:500;color:var(--t);margin-bottom:.3rem}
+.how-card p{font-size:12px;color:var(--t2);line-height:1.5}
+
+/* ── WAITING (guest landing) ── */
+#page-waiting{display:none}
+#page-waiting.on{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:1.5rem;text-align:center}
+.waiting-icon{width:60px;height:60px;border-radius:14px;background:var(--adim);border:1px solid var(--aglow);display:flex;align-items:center;justify-content:center}
+.waiting-icon svg{width:30px;height:30px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+#page-waiting h2{font-size:20px;font-weight:600}
+#page-waiting p{font-size:14px;color:var(--t2);max-width:340px}
+
+/* ── SESSION ── */
+.session-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:640px){.session-grid{grid-template-columns:1fr}}
+
+/* Stats */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px}
+.sb{background:var(--s2);border-radius:8px;padding:8px 11px}
+.sl{font-size:10px;color:var(--t3);margin-bottom:1px;text-transform:uppercase;letter-spacing:.04em}
+.sv{font-size:12px;font-weight:500;color:var(--t);font-family:var(--mono)}
+.sv.ok{color:var(--green)}.sv.warn{color:var(--yellow)}.sv.err{color:var(--red)}
+.strow{display:flex;align-items:center;gap:8px;margin-bottom:11px;padding:9px 12px;background:var(--s2);border-radius:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--t3);flex-shrink:0}
+.dot.g{background:var(--green);box-shadow:0 0 6px var(--green)}
+.dot.y{background:var(--yellow);animation:blink 1s infinite}
+.dot.r{background:var(--red)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+#stxt{font-size:13px;color:var(--t2)}
+.bww{height:3px;background:var(--s3);border-radius:99px;margin-top:5px;overflow:hidden}
+.bwb{height:100%;border-radius:99px;background:var(--green);width:0%;transition:width .5s,background .5s}
+
+/* Audio */
+.audio-src-grid{display:flex;gap:6px;margin-bottom:10px}
+.asrc{flex:1;background:var(--s2);border:1px solid var(--b);border-radius:8px;padding:9px 11px;cursor:pointer;transition:all .15s;font-family:var(--sans);text-align:left}
+.asrc:hover{border-color:var(--bh)}
+.asrc.active{border-color:var(--accent);background:var(--adim)}
+.asrc .an{font-size:12px;font-weight:500;color:var(--t);display:flex;align-items:center;gap:5px;margin-bottom:2px}
+.asrc .an svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.asrc .ad{font-size:11px;color:var(--t2)}
+select{width:100%;height:34px;background:var(--s2);border:1px solid var(--b);border-radius:var(--r);color:var(--t);font-family:var(--sans);font-size:12px;padding:0 10px;cursor:pointer}
+select:focus{outline:none;border-color:var(--accent)}
+.mic-wrap{margin-bottom:9px}
+.meter{height:3px;background:var(--s3);border-radius:99px;overflow:hidden;margin-top:5px}
+.meter-bar{height:100%;border-radius:99px;background:var(--green);width:0%;transition:width .1s}
+
+/* Quality selector */
+.qsel{display:flex;gap:5px;margin-bottom:10px}
+.qbtn{flex:1;height:30px;border-radius:7px;border:1px solid var(--b);background:var(--s2);color:var(--t2);font-size:11px;font-family:var(--sans);cursor:pointer;transition:all .15s}
+.qbtn.active{border-color:var(--accent);background:var(--adim);color:var(--accent);font-weight:500}
+.qbtn:hover:not(.active){border-color:var(--bh);color:var(--t)}
+
+/* Video */
+.vg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.vg{grid-template-columns:1fr}}
+.vc{display:flex;flex-direction:column;gap:8px}
+.vlr{display:flex;align-items:center;justify-content:space-between}
+.vlr span{font-size:11px;color:var(--t3)}
+.vbdg{font-size:10px;padding:2px 7px;border-radius:99px}
+.bl{background:rgba(124,106,247,.15);color:var(--accent)}
+.br{background:rgba(34,197,94,.1);color:var(--green)}
+.vw{background:#07070a;border:1px solid var(--b);border-radius:var(--rl);overflow:hidden;aspect-ratio:16/9;position:relative}
+.vw video{width:100%;height:100%;object-fit:contain;display:block}
+.ve{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;color:var(--t3);pointer-events:none}
+.ve svg{width:32px;height:32px;stroke:var(--t3);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.ve p{font-size:11px}
+.vovl{position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);border-radius:5px;padding:2px 7px;font-size:10px;font-family:var(--mono);color:rgba(255,255,255,.75);display:none}
+.vctl{display:flex;gap:7px;flex-wrap:wrap}
+
+/* Ice progress */
+.ice-prog{display:none;font-size:12px;color:var(--yellow);margin-top:7px;padding:7px 10px;background:var(--s2);border-radius:7px}
+
+/* Fullscreen overlay (iOS) */
+.fso{display:none;position:fixed;inset:0;background:#000;z-index:9998;flex-direction:column}
+.fso.on{display:flex}
+.fso video{flex:1;width:100%;object-fit:contain}
+.fsbar{display:flex;align-items:center;justify-content:space-between;padding:env(safe-area-inset-top,10px) 16px 10px;background:rgba(0,0,0,.75);flex-shrink:0}
+.fsbar span{font-size:13px;color:rgba(255,255,255,.7)}
+.fscls{background:transparent;border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;font-size:13px;font-family:var(--sans);padding:5px 13px;cursor:pointer}
+
+/* Share link box */
+.link-box{background:var(--s2);border:1px solid var(--b);border-radius:var(--r);padding:10px 13px;margin-top:10px}
+.link-box-label{font-size:11px;color:var(--t3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+.link-url{font-size:11px;font-family:var(--mono);color:var(--accent);word-break:break-all;line-height:1.5;margin-bottom:8px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--s2);border:1px solid var(--bh);color:var(--t);font-size:13px;padding:8px 18px;border-radius:99px;opacity:0;transition:all .25s;pointer-events:none;z-index:9999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bh);border-radius:99px}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<header>
+  <div class="brand">
+    <div class="bi"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg></div>
+    <div class="bn">Private<span>Share</span></div>
+  </div>
+  <div class="ppill">
+    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    P2P · chiffré · aucun serveur
+  </div>
+</header>
+
+<!-- ══ PAGE HOME ══ -->
+<div id="page-home">
+  <div class="home-hero">
+    <h1>Partagez votre écran<br><span>en privé</span></h1>
+    <p>Connexion directe entre navigateurs. Chiffré, sans compte, sans serveur. Jusqu'en 4K 60fps.</p>
+    <div class="home-actions">
+      <button class="btn bta" onclick="startAsHost()">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>
+        Partager mon écran
+      </button>
+      <button class="btn" onclick="showJoinBox()">
+        <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Rejoindre une session
+      </button>
+    </div>
+
+    <!-- Join box (hidden by default) -->
+    <div id="join-box" style="display:none;max-width:400px;margin:1.25rem auto 0">
+      <div class="card">
+        <div class="lbl">Collez le code de session reçu</div>
+        <div class="row">
+          <input id="join-code" type="text" placeholder="Collez le code ici…"
+            style="flex:1;height:38px;background:var(--s2);border:1px solid var(--b);border-radius:var(--r);color:var(--t);font-family:var(--mono);font-size:11px;padding:0 10px"
+            oninput="this.style.borderColor=this.value?'var(--accent)':'var(--b)'">
+          <button class="btn bta" onclick="joinWithCode()">Rejoindre</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-num">1</div>
+      <h3>Cliquez "Partager mon écran"</h3>
+      <p>Choisissez votre source audio (micro, BlackHole…) et la qualité vidéo, puis démarrez.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-num">2</div>
+      <h3>Envoyez le code</h3>
+      <p>Un code court est généré. Copiez-le et envoyez-le par WhatsApp, email ou n'importe quel canal.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-num">3</div>
+      <h3>Votre correspondant colle le code</h3>
+      <p>Il clique "Rejoindre", colle le code et la connexion s'établit en quelques secondes.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE WAITING (guest) ══ -->
+<div id="page-waiting">
+  <div class="waiting-icon">
+    <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+  </div>
+  <h2>Session en cours de connexion…</h2>
+  <p id="waiting-desc">Vous avez rejoint la session. En attente de l'hôte…</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+    <button class="btn" onclick="goHome()">
+      <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Retour
+    </button>
+  </div>
+</div>
+
+<!-- ══ PAGE SESSION ══ -->
+<div id="page-session">
+
+  <div class="session-grid">
+
+    <!-- Contrôles hôte -->
+    <div class="card" id="host-panel">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem">
+        <div style="width:20px;height:20px;border-radius:50%;background:var(--adim);border:1px solid var(--aglow);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--accent);flex-shrink:0">H</div>
+        <span style="font-size:13px;font-weight:500;color:var(--t2);text-transform:uppercase;letter-spacing:.04em">Hôte — Votre partage</span>
+      </div>
+
+      <!-- Qualité -->
+      <div class="lbl">Qualité vidéo</div>
+      <div class="qsel">
+        <button class="qbtn" id="q-hd" onclick="setQ('hd')">HD 1080p</button>
+        <button class="qbtn active" id="q-2k" onclick="setQ('2k')">2K 60fps</button>
+        <button class="qbtn" id="q-4k" onclick="setQ('4k')">4K 60fps</button>
+      </div>
+
+      <!-- Source audio -->
+      <div class="lbl">Source audio</div>
+      <div class="audio-src-grid">
+        <button class="asrc active" id="asrc-mic" onclick="setAudio('mic')">
+          <div class="an"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>Microphone</div>
+          <div class="ad">Micro / BlackHole / Loopback</div>
+        </button>
+        <button class="asrc" id="asrc-tab" onclick="setAudio('tab')">
+          <div class="an"><svg viewBox="0 0 24 24"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/></svg>Onglet</div>
+          <div class="ad">Son d'un onglet Chrome</div>
+        </button>
+      </div>
+
+      <div class="mic-wrap" id="mic-wrap">
+        <select id="mic-sel"></select>
+        <div class="meter"><div class="meter-bar" id="meter-bar"></div></div>
+        <div style="font-size:10px;color:var(--t3);margin-top:3px" id="meter-lbl">Niveau audio</div>
+      </div>
+
+      <!-- Actions -->
+      <button class="btn bta btf" id="btn-share" onclick="startShare()">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>
+        Démarrer le partage
+      </button>
+      <button class="btn btf mt8" id="btn-stop" onclick="stopShare()" disabled>
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+        Arrêter le partage
+      </button>
+
+      <!-- Code de session -->
+      <div class="link-box mt12" id="link-box" style="display:none">
+        <div class="link-box-label">Code à envoyer à votre correspondant</div>
+        <div class="link-url" id="link-url"></div>
+        <button class="btn btsm btf" onclick="copySessionCode()">
+          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copier le code
+        </button>
+      </div>
+      <div class="ice-prog" id="ice-prog">⏳ Collecte réseau en cours…</div>
+    </div>
+
+    <!-- Statut -->
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem">
+        <div style="width:20px;height:20px;border-radius:50%;background:var(--adim);border:1px solid var(--aglow);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--accent)">S</div>
+        <span style="font-size:13px;font-weight:500;color:var(--t2);text-transform:uppercase;letter-spacing:.04em">Statut & performances</span>
+      </div>
+
+      <div class="strow"><div class="dot" id="dot"></div><span id="stxt">Déconnecté</span></div>
+
+      <div class="sg">
+        <div class="sb"><div class="sl">Qualité</div><div class="sv" id="i-q">2K</div></div>
+        <div class="sb"><div class="sl">Audio</div><div class="sv" id="i-audio">—</div></div>
+        <div class="sb"><div class="sl">Résolution</div><div class="sv" id="i-res">—</div></div>
+        <div class="sb"><div class="sl">FPS</div><div class="sv" id="i-fps">—</div></div>
+        <div class="sb">
+          <div class="sl">Débit</div>
+          <div class="sv" id="i-bw">—</div>
+          <div class="bww"><div class="bwb" id="bwb"></div></div>
+        </div>
+        <div class="sb"><div class="sl">Chiffrement</div><div class="sv ok">DTLS/SRTP</div></div>
+      </div>
+
+      <button class="btn btd btf" id="btn-disc" onclick="endSession()" disabled>
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Terminer la session
+      </button>
+    </div>
+  </div>
+
+  <!-- Vidéo -->
+  <div class="card">
+    <div class="vg">
+      <div class="vc">
+        <div class="vlr"><span>Votre écran</span><span class="vbdg bl">Local</span></div>
+        <div class="vw">
+          <video id="lv" autoplay muted playsinline webkit-playsinline></video>
+          <div class="ve" id="le">
+            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>
+            <p>Pas encore partagé</p>
+          </div>
+          <div class="vovl" id="lovl"></div>
+        </div>
+      </div>
+      <div class="vc">
+        <div class="vlr"><span>Écran distant</span><span class="vbdg br">Distant</span></div>
+        <div class="vw">
+          <video id="rv" autoplay playsinline webkit-playsinline x-webkit-airplay="allow"></video>
+          <div class="ve" id="re">
+            <svg viewBox="0 0 24 24"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+            <p>En attente</p>
+          </div>
+          <div class="vovl" id="rovl"></div>
+        </div>
+        <div class="vctl">
+          <button class="btn btf" onclick="goFS()">
+            <svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+            Plein écran
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-session -->
+
+</div><!-- /shell -->
+
+<!-- Fullscreen overlay iOS -->
+<div class="fso" id="fso">
+  <div class="fsbar">
+    <span>PrivateShare</span>
+    <button class="fscls" onclick="closeFS()">✕ Fermer</button>
+  </div>
+  <video id="fsv" autoplay playsinline webkit-playsinline></video>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════
+   CONFIG QUALITÉ — 4K 60fps max
+══════════════════════════════════ */
+const QUALITY = {
+  hd:  { w:1920, h:1080, fps:30,  bps:8_000_000,  maxBps:12_000_000,  label:'HD 1080p 30fps'  },
+  '2k':{ w:2560, h:1440, fps:60,  bps:20_000_000, maxBps:30_000_000,  label:'2K 1440p 60fps'  },
+  '4k':{ w:3840, h:2160, fps:60,  bps:40_000_000, maxBps:60_000_000,  label:'4K 2160p 60fps'  },
+};
+
+const ICE = {
+  iceServers:[
+    {urls:'stun:stun.l.google.com:19302'},
+    {urls:'stun:stun1.l.google.com:19302'},
+    {urls:'stun:stun2.l.google.com:19302'},
+    {urls:'stun:stun3.l.google.com:19302'},
+  ],
+  iceCandidatePoolSize:10
+};
+
+/* ══ State ══ */
+let pc=null, localStream=null, audioStream=null;
+let audioCtx=null, meterTimer=null, statsTimer=null;
+let audioSrc='mic', quality='2k', role='host';
+let lbR=0,lbS=0,ltS=0;
+let sessionOffer=null; // stored SDP offer for display
+
+/* ══ Navigation ══ */
+function showPage(id){
+  ['page-home','page-waiting','page-session'].forEach(p=>{
+    document.getElementById(p).classList.remove('on');
+  });
+  document.getElementById(id).classList.add('on');
+}
+
+function goHome(){
+  endSession();
+  showPage('page-home');
+  document.getElementById('join-box').style.display='none';
+}
+
+function showJoinBox(){
+  const box=document.getElementById('join-box');
+  box.style.display=box.style.display==='none'?'block':'none';
+}
+
+/* ══ HOST flow ══ */
+async function startAsHost(){
+  role='host';
+  showPage('page-session');
+  document.getElementById('host-panel').style.display='block';
+  setStatus('y','Prêt — démarrez le partage');
+  await loadMics();
+}
+
+async function startShare(){
+  stopMicMeter();
+  makePC();
+  setStatus('y','Sélection de l\'écran…');
+  try{
+    localStream = await captureMedia();
+    attachLocal(localStream);
+    localStream.getTracks().forEach(t=>pc.addTrack(t,localStream));
+
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+
+    const prog = document.getElementById('ice-prog');
+    prog.style.display='block';
+    prog.textContent='⏳ Collecte réseau…';
+    setStatus('y','Collecte réseau…');
+
+    await waitForICE(pc);
+
+    // Encode SDP as compact base64
+    const code = btoa(JSON.stringify(pc.localDescription));
+    sessionOffer = code;
+
+    // Show link box
+    const lb = document.getElementById('link-box');
+    const lu = document.getElementById('link-url');
+    // Show compact code (first 40 chars + …)
+    lu.textContent = code.slice(0,60)+'…';
+    lu._full = code;
+    lb.style.display='block';
+
+    prog.textContent='✅ Prêt — envoyez le code';
+    prog.style.color='var(--green)';
+    setStatus('y','En attente du correspondant…');
+    toast('Code prêt — copiez et envoyez-le');
+  }catch(err){
+    setStatus('r', friendlyErr(err));
+    toast(friendlyErr(err));
+    startMicMeter();
+  }
+}
+
+function copySessionCode(){
+  const code = document.getElementById('link-url')._full || sessionOffer;
+  navigator.clipboard.writeText(code).then(()=>toast('✅ Code copié !'));
+}
+
+/* ══ GUEST flow ══ */
+function joinWithCode(){
+  const raw = document.getElementById('join-code').value.trim();
+  if(!raw){ toast('Collez un code de session'); return; }
+  role='guest';
+  document.getElementById('join-code').value='';
+  document.getElementById('join-box').style.display='none';
+  processGuestCode(raw);
+}
+
+async function processGuestCode(raw){
+  showPage('page-waiting');
+  document.getElementById('waiting-desc').textContent='Connexion en cours…';
+  makePC();
+  setStatus('y','Traitement du code…');
+  try{
+    const offer = JSON.parse(atob(raw));
+    await pc.setRemoteDescription(offer);
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+
+    await waitForICE(pc);
+
+    // Show answer code to send back
+    const answerCode = btoa(JSON.stringify(pc.localDescription));
+    showPage('page-session');
+    document.getElementById('host-panel').style.display='none';
+
+    // Show answer box so guest can send back
+    const lb = document.getElementById('link-box');
+    const lu = document.getElementById('link-url');
+    lb.style.display='block';
+    lu.textContent = answerCode.slice(0,60)+'…';
+    lu._full = answerCode;
+    document.querySelector('.link-box-label').textContent='Envoyez ce code de réponse à l\'hôte';
+    // Show copy button, hide share controls
+    setStatus('y','Envoyez le code de réponse à l\'hôte');
+    toast('Code de réponse prêt — copiez et envoyez à l\'hôte');
+
+    // Listen for host to paste answer
+    // We show an input for host to paste the answer
+    showAnswerInput(answerCode);
+  }catch(e){
+    showPage('page-home');
+    toast('Code invalide : '+e.message);
+  }
+}
+
+function showAnswerInput(myAnswerCode){
+  // On the session page for guest, show a field to also receive the host's finalization
+  // Actually in this simplified flow: guest generates answer → sends to host → host pastes it
+  // We need to show the host where to paste the answer code
+  // This is already handled via the host panel "receive answer" section
+  // Just show a small notice
+  const notice = document.createElement('div');
+  notice.style.cssText='background:var(--s2);border:1px solid var(--b);border-radius:var(--r);padding:10px 13px;margin-top:10px;font-size:12px;color:var(--t2)';
+  notice.innerHTML='<strong style="color:var(--t)">Étape suivante :</strong> L\'hôte doit coller votre code de réponse dans son panneau pour finaliser la connexion.';
+  document.getElementById('link-box').after(notice);
+}
+
+/* ══ Host receives guest answer ══ */
+// We add a small "paste answer" section in host panel after code is generated
+function showPasteAnswerSection(){
+  if(document.getElementById('paste-section')) return;
+  const div=document.createElement('div');
+  div.id='paste-section';
+  div.style.marginTop='10px';
+  div.innerHTML=`
+    <div class="lbl" style="margin-bottom:5px">Code de réponse reçu du correspondant</div>
+    <div class="row">
+      <input id="ans-in" placeholder="Collez le code de réponse…"
+        style="flex:1;height:34px;background:var(--s2);border:1px solid var(--b);border-radius:var(--r);color:var(--t);font-family:var(--mono);font-size:10px;padding:0 9px"
+        oninput="this.style.borderColor=this.value?'var(--accent)':'var(--b)'">
+      <button class="btn bta btsm" onclick="receiveAnswer()">Connecter</button>
+    </div>`;
+  document.getElementById('link-box').after(div);
+}
+
+async function receiveAnswer(){
+  const raw = document.getElementById('ans-in')?.value.trim();
+  if(!raw||!pc){toast('Collez le code de réponse');return}
+  try{
+    await pc.setRemoteDescription(JSON.parse(atob(raw)));
+    setStatus('y','Connexion en cours…');
+    document.getElementById('paste-section')?.remove();
+  }catch(e){toast('Code invalide');}
+}
+
+/* ══ Quality ══ */
+function setQ(q){
+  quality=q;
+  ['hd','2k','4k'].forEach(k=>document.getElementById('q-'+k).classList.toggle('active',k===q));
+  document.getElementById('i-q').textContent=QUALITY[q].label;
+  if(pc && localStream) applyEncoderParams();
+}
+
+/* ══ Audio source ══ */
+function setAudio(src){
+  audioSrc=src;
+  document.getElementById('asrc-mic').classList.toggle('active',src==='mic');
+  document.getElementById('asrc-tab').classList.toggle('active',src==='tab');
+  document.getElementById('mic-wrap').style.display=src==='mic'?'block':'none';
+  if(src==='mic') startMicMeter(); else stopMicMeter();
+}
+
+/* ══ Microphones ══ */
+async function loadMics(){
+  try{
+    const tmp=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+    tmp.getTracks().forEach(t=>t.stop());
+    const devs=await navigator.mediaDevices.enumerateDevices();
+    const mics=devs.filter(d=>d.kind==='audioinput');
+    const sel=document.getElementById('mic-sel');
+    sel.innerHTML=mics.map(m=>`<option value="${m.deviceId}">${m.label||'Micro '+m.deviceId.slice(0,8)}</option>`).join('');
+    const bh=mics.find(m=>/blackhole|loopback/i.test(m.label));
+    if(bh){sel.value=bh.deviceId;toast('🎵 BlackHole détecté !');}
+    sel.onchange=startMicMeter;
+    startMicMeter();
+  }catch(e){
+    document.getElementById('mic-sel').innerHTML='<option>Permission refusée</option>';
+  }
+}
+
+async function startMicMeter(){
+  stopMicMeter();
+  if(audioSrc!=='mic') return;
+  const micId=document.getElementById('mic-sel')?.value;
+  if(!micId) return;
+  try{
+    audioStream=await navigator.mediaDevices.getUserMedia({
+      audio:{deviceId:{exact:micId},echoCancellation:false,noiseSuppression:false,autoGainControl:false}
+    });
+    audioCtx=new AudioContext();
+    const src=audioCtx.createMediaStreamSource(audioStream);
+    const an=audioCtx.createAnalyser();an.fftSize=256;
+    src.connect(an);
+    const data=new Uint8Array(an.frequencyBinCount);
+    meterTimer=setInterval(()=>{
+      an.getByteFrequencyData(data);
+      const avg=data.reduce((a,b)=>a+b,0)/data.length;
+      const pct=Math.min(100,avg*2.2);
+      const bar=document.getElementById('meter-bar');
+      if(bar) bar.style.width=pct+'%',bar.style.background=pct>65?'var(--red)':pct>30?'var(--yellow)':'var(--green)';
+      const lbl=document.getElementById('meter-lbl');
+      if(lbl) lbl.textContent=pct>5?'🎵 Signal détecté':'Silence…',lbl.style.color=pct>5?'var(--green)':'var(--t3)';
+    },80);
+  }catch(e){}
+}
+function stopMicMeter(){
+  clearInterval(meterTimer);
+  if(audioStream){audioStream.getTracks().forEach(t=>t.stop());audioStream=null;}
+  if(audioCtx){audioCtx.close();audioCtx=null;}
+}
+
+/* ══ Capture media — 4K 60fps ══ */
+async function captureMedia(){
+  const q = QUALITY[quality];
+  // Video via getDisplayMedia — demander 4K 60fps
+  const videoStream = await navigator.mediaDevices.getDisplayMedia({
+    video:{
+      width:    {ideal:q.w, max:q.w},
+      height:   {ideal:q.h, max:q.h},
+      frameRate:{ideal:q.fps, max:q.fps},
+      cursor:   'always',
+      // Chrome only — hint pour préférer la qualité
+      ...(navigator.userAgent.includes('Chrome')
+        ? {displaySurface:'monitor', resizeMode:'none'}
+        : {})
+    },
+    audio: audioSrc==='tab'
+  });
+
+  let audioTrack = null;
+
+  if(audioSrc==='tab'){
+    const at = videoStream.getAudioTracks();
+    if(at.length>0){ audioTrack=at[0]; toast('✅ Audio onglet capturé'); }
+    else toast('⚠️ Cochez "Partager l\'audio de l\'onglet"');
+  } else {
+    // getUserMedia séparé — technique Jitsi
+    try{
+      const micId = document.getElementById('mic-sel')?.value;
+      const ms = await navigator.mediaDevices.getUserMedia({
+        audio: micId
+          ? {deviceId:{exact:micId},echoCancellation:false,noiseSuppression:false,autoGainControl:false,sampleRate:48000,channelCount:2}
+          : {echoCancellation:false,noiseSuppression:false}
+      });
+      audioTrack = ms.getAudioTracks()[0];
+      toast('✅ '+(audioTrack.label||'Audio capturé'));
+    }catch(e){ toast('⚠️ Audio indisponible : '+e.message); }
+  }
+
+  const combined = new MediaStream();
+  videoStream.getVideoTracks().forEach(t=>combined.addTrack(t));
+  if(audioTrack) combined.addTrack(audioTrack);
+  return combined;
+}
+
+/* ══ Encodeur — impose 4K 60fps au codec ══ */
+async function applyEncoderParams(){
+  if(!pc) return;
+  const q = QUALITY[quality];
+  for(const sender of pc.getSenders()){
+    if(!sender.track || sender.track.kind!=='video') continue;
+    try{
+      const params = sender.getParameters();
+      if(!params.encodings?.length) params.encodings=[{}];
+      params.encodings[0].maxBitrate    = q.maxBps;
+      params.encodings[0].minBitrate    = q.bps;
+      params.encodings[0].maxFramerate  = q.fps;
+      params.encodings[0].networkPriority = 'high';
+      params.encodings[0].priority       = 'high';
+      params.degradationPreference = 'maintain-framerate'; // priorité fps sur résolution
+      await sender.setParameters(params);
+    }catch(e){}
+  }
+}
+
+/* ══ ICE gathering ══ */
+function waitForICE(pc){
+  return new Promise(resolve=>{
+    if(pc.iceGatheringState==='complete'){resolve();return}
+    const done=()=>{
+      pc.removeEventListener('icecandidate',onC);
+      pc.removeEventListener('icegatheringstatechange',onS);
+      resolve();
+    };
+    const onC=e=>{if(!e.candidate)done();};
+    const onS=()=>{if(pc.iceGatheringState==='complete')done();};
+    pc.addEventListener('icecandidate',onC);
+    pc.addEventListener('icegatheringstatechange',onS);
+    setTimeout(done,12000);
+  });
+}
+
+/* ══ PeerConnection ══ */
+function makePC(){
+  if(pc) pc.close();
+  pc = new RTCPeerConnection(ICE);
+
+  pc.ontrack = e=>{
+    const rv=document.getElementById('rv');
+    rv.srcObject=e.streams[0];
+    document.getElementById('re').style.display='none';
+    document.getElementById('rovl').style.display='block';
+    setStatus('g','Connecté — flux reçu');
+    document.getElementById('btn-disc').disabled=false;
+    startStats();
+    const hasAudio=e.streams[0].getAudioTracks().length>0;
+    const ael=document.getElementById('i-audio');
+    ael.textContent=hasAudio?'✓ Oui':'✗ Non';
+    ael.className='sv'+(hasAudio?' ok':'');
+    // Apply encoder params once connected
+    setTimeout(applyEncoderParams, 500);
+  };
+
+  pc.oniceconnectionstatechange=()=>{
+    const s=pc.iceConnectionState;
+    if(s==='connected'||s==='completed') setStatus('g','Connecté');
+    else if(s==='checking') setStatus('y','Connexion…');
+    else if(['disconnected','closed','failed'].includes(s)){
+      setStatus('r','Déconnecté');
+      document.getElementById('btn-disc').disabled=true;
+    }
+  };
+}
+
+/* ══ Attach local stream ══ */
+function attachLocal(stream){
+  const lv=document.getElementById('lv');
+  lv.srcObject=stream;
+  document.getElementById('le').style.display='none';
+  document.getElementById('btn-stop').disabled=false;
+  document.getElementById('btn-share').disabled=true;
+  const vt=stream.getVideoTracks()[0];
+  if(vt){
+    vt.onended=stopShare;
+    // Show info after a short delay to let settings propagate
+    setTimeout(()=>{
+      const s=vt.getSettings();
+      const ovl=document.getElementById('lovl');
+      ovl.textContent=(s.width||'?')+'×'+(s.height||'?')+' · '+(Math.round(s.frameRate)||'?')+'fps';
+      ovl.style.display='block';
+    },500);
+  }
+  document.getElementById('i-audio').textContent=stream.getAudioTracks().length>0?'✓ Oui':'✗ Non';
+  document.getElementById('i-audio').className='sv'+(stream.getAudioTracks().length>0?' ok':'');
+  // Show paste answer section for host
+  if(role==='host') showPasteAnswerSection();
+}
+
+function stopShare(){
+  if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null;}
+  document.getElementById('lv').srcObject=null;
+  document.getElementById('le').style.display='flex';
+  document.getElementById('lovl').style.display='none';
+  document.getElementById('btn-stop').disabled=true;
+  document.getElementById('btn-share').disabled=false;
+  toast('Partage arrêté');
+  startMicMeter();
+}
+
+function endSession(){
+  if(pc){pc.close();pc=null;}
+  stopShare();
+  stopMicMeter();
+  clearInterval(statsTimer);
+  const rv=document.getElementById('rv');
+  rv.srcObject=null;
+  document.getElementById('re').style.display='flex';
+  document.getElementById('rovl').style.display='none';
+  document.getElementById('btn-disc').disabled=true;
+  ['i-res','i-fps','i-bw'].forEach(id=>document.getElementById(id).textContent='—');
+  document.getElementById('bwb').style.width='0';
+  document.getElementById('link-box').style.display='none';
+  document.getElementById('ice-prog').style.display='none';
+  document.getElementById('paste-section')?.remove();
+  lbR=0;lbS=0;ltS=0;
+  setStatus('','Déconnecté');
+}
+
+/* ══ Fullscreen — iOS compatible ══ */
+function goFS(){
+  const rv=document.getElementById('rv');
+  const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(isIOS){
+    if(rv.webkitEnterFullscreen){rv.webkitEnterFullscreen();return;}
+    // Fallback overlay
+    const fv=document.getElementById('fsv');
+    fv.srcObject=rv.srcObject;
+    document.getElementById('fso').classList.add('on');
+    document.body.style.overflow='hidden';
+    fv.play().catch(()=>{});
+    return;
+  }
+  const fn=rv.requestFullscreen||rv.webkitRequestFullscreen||rv.mozRequestFullScreen||rv.msRequestFullscreen;
+  if(fn) fn.call(rv).catch(()=>{
+    const fv=document.getElementById('fsv');
+    fv.srcObject=rv.srcObject;
+    document.getElementById('fso').classList.add('on');
+    document.body.style.overflow='hidden';
+    fv.play().catch(()=>{});
+  });
+}
+function closeFS(){
+  document.getElementById('fso').classList.remove('on');
+  document.body.style.overflow='';
+  document.getElementById('fsv').srcObject=null;
+}
+window.addEventListener('orientationchange',()=>{
+  if(document.getElementById('fso').classList.contains('on')&&window.orientation===0) closeFS();
+});
+
+/* ══ Stats temps réel ══ */
+function startStats(){
+  clearInterval(statsTimer);
+  ltS=performance.now();
+  statsTimer=setInterval(async()=>{
+    if(!pc) return;
+    const now=performance.now(),dt=(now-ltS)/1000; ltS=now;
+    const stats=await pc.getStats();
+    stats.forEach(r=>{
+      if(r.type==='inbound-rtp'&&r.kind==='video'){
+        if(r.frameWidth){
+          document.getElementById('i-res').textContent=r.frameWidth+'×'+r.frameHeight;
+          const rovl=document.getElementById('rovl');
+          rovl.textContent=r.frameWidth+'×'+r.frameHeight+' · '+Math.round(r.framesPerSecond||0)+'fps';
+        }
+        document.getElementById('i-fps').textContent=Math.round(r.framesPerSecond||0)+' fps';
+        const b=r.bytesReceived||0;
+        if(lbR>0&&dt>0) setBW((b-lbR)*8/dt);
+        lbR=b;
+      }
+      if(r.type==='outbound-rtp'&&r.kind==='video'){
+        const b=r.bytesSent||0;
+        if(lbS>0&&dt>0) setBW((b-lbS)*8/dt);
+        lbS=b;
+      }
+    });
+  },1500);
+}
+function setBW(bps){
+  const mbps=bps/1e6;
+  document.getElementById('i-bw').textContent=mbps.toFixed(1)+' Mbps';
+  const max=QUALITY[quality].maxBps/1e6;
+  const pct=Math.min(100,mbps/max*100);
+  document.getElementById('bwb').style.width=pct+'%';
+  document.getElementById('bwb').style.background=pct<40?'var(--green)':pct<75?'var(--yellow)':'var(--red)';
+}
+
+/* ══ Helpers ══ */
+function setStatus(c,t){
+  document.getElementById('dot').className='dot'+(c?' '+c:'');
+  document.getElementById('stxt').textContent=t;
+}
+function friendlyErr(err){
+  if(err.name==='NotAllowedError') return 'Permission refusée — vérifiez les réglages Mac';
+  if(err.name==='NotFoundError') return 'Aucun écran à capturer';
+  if(err.name==='NotSupportedError') return 'Non supporté — utilisez Chrome';
+  return err.message;
+}
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),3500);
+}
+
+/* ══ Init ══ */
+showPage('page-home');
+</script>
+</body>
+</html>
